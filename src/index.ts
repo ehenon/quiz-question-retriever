@@ -3,19 +3,24 @@ import fs from 'fs';
 import fsp from 'fs/promises';
 import ollama from 'ollama';
 
-const OUTPUT_FOLDER = './output';
+enum AvailableAIModels {
+  Llama3 = 'llama3',
+  Mistral = 'mistral',
+  Phi3 = 'phi3',
+}
 
+const CHOSEN_AI = AvailableAIModels.Llama3;
+
+const OUTPUT_FOLDER = './output';
 const REPLAY_DOWNLOAD_FOLDER = `${OUTPUT_FOLDER}/1_qpuc_replay`;
 const REPLAY_SUBTITLE_FILE_NAME = 'qpuc';
 const REPLAY_SUBTITLE_FILE_EXTENSION = '.qsm.vtt';
 const REPLAY_SUBTITLE_FILE_PATH = `${REPLAY_DOWNLOAD_FOLDER}/${REPLAY_SUBTITLE_FILE_NAME}${REPLAY_SUBTITLE_FILE_EXTENSION}`;
-
 const PARSED_SUBTITLE_FILE_FOLDER = `${OUTPUT_FOLDER}/2_parsed_subtitles`;
 const PARSED_SUBTITLE_FILE_NAME = 'parsed_vtt';
 const PARSED_SUBTITLE_FILE_PATH = `${PARSED_SUBTITLE_FILE_FOLDER}/${PARSED_SUBTITLE_FILE_NAME}.txt`;
-
 const AI_OUTPUT_FOLDER = `${OUTPUT_FOLDER}/3_ai_output`;
-const AI_OUTPUT_FILE_NAME = 'llama3_response';
+const AI_OUTPUT_FILE_NAME = 'ai_response';
 const AI_OUTPUT_FILE_PATH = `${AI_OUTPUT_FOLDER}/${AI_OUTPUT_FILE_NAME}.txt`;
 
 const getReplayUrl = (): string => {
@@ -106,17 +111,17 @@ const parseSubtitleFile = async (filePath: string): Promise<string> => {
 
 const getChatPromptFromParsedSubtitles = (parsedSubtitles: string): string => `J'ai récupéré un extrait de sous-titres correspondant à la fin d'une émission de jeu télévisé de quiz, à peu près au moment où la présentation des cadeaux des candidats est en cours et où la dernière manche du jeu va bientôt commencer. Cette dernière manche, opposant deux joueurs, consiste à essayer de répondre le plus vite possible à une longue question posée par le présentateur. Lorsqu'une réponse fausse est donnée, la question continue. Lorsqu'une réponse correcte est donnée, le joueur gagne le point et le présentateur continue un peu la question afin de donner tous les éléments d'explication aux téléspectateurs. Avant chaque question, le présentateur annonce un thème, et propose à un candidat de prendre ou de laisser la main en fonction de son attrait pour ce thème. Peux-tu extraire les questions posées par le présentateur en concaténant les bouts de question afin qu'elles soient correctement formatées et ne contiennent pas d'informations superflues ? J'ai besoin que tu présentes ta réponse sous forme de liste de questions, avec les données suivantes : le "libellé" de la question, le "thème", et la "réponse". Voici l'extrait de sous-titres :\n\n\`${parsedSubtitles}\``;
 
-const callLlama3 = async (prompt: string): Promise<string> => {
+const callAIModel = async (prompt: string): Promise<string> => {
   try {
-    console.log('* Calling Llama3 AI...');
+    console.log('* Calling AI...');
     const response = await ollama.chat({
-      model: 'llama3',
+      model: CHOSEN_AI,
       messages: [{ role: 'user', content: prompt }],
     });
-    console.log('✓ Llama3 response successfully retrieved');
+    console.log('✓ AI response successfully retrieved');
     return response.message.content;
   } catch (err) {
-    console.log(`✗ An error occurred when calling Llama3 AI: ${err}`);
+    console.log(`✗ An error occurred when calling AI: ${err}`);
     process.exit(1);
   }
 };
@@ -141,7 +146,7 @@ const writeAIResponse = async (response: string) => {
   await downloadReplayFiles(replayUrl);
   const parsedSubtitles = await parseSubtitleFile(REPLAY_SUBTITLE_FILE_PATH);
   const chatPrompt = getChatPromptFromParsedSubtitles(parsedSubtitles);
-  const llama3Response = await callLlama3(chatPrompt);
-  await writeAIResponse(llama3Response);
+  const aiResponse = await callAIModel(chatPrompt);
+  await writeAIResponse(aiResponse);
   process.exit(0);
 })();
