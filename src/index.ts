@@ -88,7 +88,7 @@ const parseSubtitleFile = async (filePath: string): Promise<string> => {
         && fileLine.trim() !== ''
         && !fileLine.trim().includes('-->')
         && !/^\d+$/.test(fileLine.trim())) {
-        parsedContent += `${fileLine.trim().replace(/<c.white>|<c.magenta>|<c.red>|<c.green>|<c.cyan>|<c.yellow>|<\/c>/g, '')} `;
+        parsedContent += `${fileLine.trim().replace(/<c.white>|<c.magenta>|<c.red>|<c.green>|<c.cyan>|<c.yellow>|france.tv access|<\/c>/g, '')} `;
       }
     });
 
@@ -108,7 +108,7 @@ const parseSubtitleFile = async (filePath: string): Promise<string> => {
 const generateAIPrompt = async (parsedSubtitles: string): Promise<string> => {
   try {
     console.log('* Generating AI prompt...');
-    const prompt = `J'ai récupéré un extrait de sous-titres correspondant à la fin d'une émission de jeu télévisé de quiz, à peu près au moment où la présentation des cadeaux des candidats est en cours et où la dernière manche du jeu va bientôt commencer. Cette dernière manche, opposant deux joueurs, consiste à essayer de répondre le plus vite possible à une longue question posée par le présentateur. Lorsqu'une réponse fausse est donnée, la question continue. Lorsqu'une réponse correcte est donnée, le joueur gagne le point et le présentateur continue un peu la question afin de donner tous les éléments d'explication aux téléspectateurs. Avant chaque question, le présentateur annonce un thème, et propose à un candidat de prendre ou de laisser la main en fonction de son attrait pour ce thème. Peux-tu extraire les questions posées par le présentateur en concaténant les bouts de question afin qu'elles soient correctement formatées et ne contiennent pas d'informations superflues ? J'ai besoin que tu présentes ta réponse sous forme de liste de questions, avec les données suivantes : le "libellé" de la question, le "thème", et la "réponse". Voici l'extrait de sous-titres :\n\n\`${parsedSubtitles}\``;
+    const prompt = `J'ai récupéré un extrait de sous-titres correspondant à la fin d'une émission de jeu télévisé de quiz, à peu près au moment où la présentation des cadeaux des candidats est en cours et où la dernière manche du jeu va bientôt commencer. Cette dernière manche, opposant deux joueurs, consiste à essayer de répondre le plus vite possible à une longue question posée par le présentateur. Lorsqu'une réponse fausse est donnée, la question continue. Lorsqu'une réponse correcte est donnée, le joueur gagne le point et le présentateur continue un peu la question afin de donner tous les éléments d'explication aux téléspectateurs. Avant chaque question, le présentateur annonce un thème, et propose à un candidat de prendre ou de laisser la main en fonction de son attrait pour ce thème. Peux-tu extraire les questions posées par le présentateur en concaténant les bouts de question afin qu'elles soient correctement formatées et complètes ? Lorsqu'une bonne réponse est donnée par un joueur, j'aimerais que les éléments de la suite de la question soient inclus également, pour que la question soit complète comme si personne n'avait trouvé la réponse. J'ai besoin que tu présentes ta réponse sous forme de tableau, avec les données suivantes : le "libellé" de la question, le "thème", et la "réponse". Voici l'extrait de sous-titres :\n\n\`${parsedSubtitles}\``;
     if (!fs.existsSync(AI_PROMPT_FOLDER)) {
       await fsp.mkdir(AI_PROMPT_FOLDER);
     }
