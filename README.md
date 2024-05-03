@@ -12,6 +12,11 @@
 $ git clone https://github.com/ehenon/quiz-question-retriever.git
 $ cd quiz-question-retriever
 $ npm i
+```
+
+## Usage 🚀
+
+```
 $ npm run launch [show_replay_url]
 $ npm run clean
 ```
