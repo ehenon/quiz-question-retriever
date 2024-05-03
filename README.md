@@ -3,6 +3,7 @@
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/)
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp)
 - [Ollama](https://github.com/ollama/ollama) with `llama3` model
 
 ## Setup ⚙️
