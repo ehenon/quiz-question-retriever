@@ -21,10 +21,13 @@ const REPLAY_SUBTITLE_FILE_PATH = `${REPLAY_DOWNLOAD_FOLDER}/${REPLAY_SUBTITLE_F
 const PARSED_SUBTITLE_FILE_FOLDER = `${OUTPUT_FOLDER}/2_parsed_subtitles`;
 const PARSED_SUBTITLE_FILE_NAME = 'parsed_vtt';
 const PARSED_SUBTITLE_FILE_PATH = `${PARSED_SUBTITLE_FILE_FOLDER}/${PARSED_SUBTITLE_FILE_NAME}.txt`;
-const AI_PROMPT_FOLDER = `${OUTPUT_FOLDER}/3_ai_prompt`;
+const HUMAN_READABLE_SUBTITLE_FILE_FOLDER = `${OUTPUT_FOLDER}/3_human_readable_subtitles`;
+const HUMAN_READABLE_SUBTITLE_FILE_NAME = 'human_readable_subs';
+const HUMAN_READABLE_SUBTITLE_FILE_PATH = `${HUMAN_READABLE_SUBTITLE_FILE_FOLDER}/${HUMAN_READABLE_SUBTITLE_FILE_NAME}.txt`;
+const AI_PROMPT_FOLDER = `${OUTPUT_FOLDER}/4_ai_prompt`;
 const AI_PROMPT_FILE_NAME = 'prompt';
 const AI_PROMPT_FILE_PATH = `${AI_PROMPT_FOLDER}/${AI_PROMPT_FILE_NAME}.txt`;
-const AI_OUTPUT_FOLDER = `${OUTPUT_FOLDER}/4_ai_output`;
+const AI_OUTPUT_FOLDER = `${OUTPUT_FOLDER}/5_ai_output`;
 const AI_OUTPUT_FILE_NAME = 'ai_response';
 const AI_OUTPUT_FILE_PATH = `${AI_OUTPUT_FOLDER}/${AI_OUTPUT_FILE_NAME}.txt`;
 
@@ -115,6 +118,23 @@ const parseSubtitleFile = async (filePath: string): Promise<string> => {
   }
 };
 
+const writeHumanReadableSubtitleFile = async (content: string): Promise<void> => {
+  try {
+    console.log('* Writing human-readable subtitle file...');
+    const fileContent = content.replace(/ -/g, '\n- ');
+
+    if (!fs.existsSync(HUMAN_READABLE_SUBTITLE_FILE_FOLDER)) {
+      await fsp.mkdir(HUMAN_READABLE_SUBTITLE_FILE_FOLDER);
+    }
+
+    await fsp.writeFile(HUMAN_READABLE_SUBTITLE_FILE_PATH, fileContent, 'utf-8');
+    console.log('✓ Human-readable subtitle file successfully written');
+  } catch (err) {
+    console.log(`✗ An error occurred when writing the human-readable subtitle file: ${err}`);
+    process.exit(1);
+  }
+};
+
 const generateAIPrompt = async (parsedSubtitles: string): Promise<string> => {
   try {
     console.log('* Generating AI prompt...');
@@ -165,6 +185,7 @@ const writeAIResponse = async (response: string) => {
   await createOutputFolder();
   await downloadReplayFiles(replayUrl);
   const parsedSubtitles = await parseSubtitleFile(REPLAY_SUBTITLE_FILE_PATH);
+  await writeHumanReadableSubtitleFile(parsedSubtitles);
   const chatPrompt = await generateAIPrompt(parsedSubtitles);
   const aiResponse = await callAIModel(chatPrompt);
   await writeAIResponse(aiResponse);
