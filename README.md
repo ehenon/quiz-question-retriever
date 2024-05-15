@@ -17,6 +17,6 @@ $ npm i
 ## Usage 🚀
 
 ```
-$ npm run launch [show_replay_url]
+$ npm run launch
 $ npm run clean
 ```
