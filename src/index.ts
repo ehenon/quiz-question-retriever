@@ -58,7 +58,7 @@ const run = async (cmd: string) => new Promise((resolve, reject) => {
 
 const createOutputFolder = async () => {
   try {
-    console.log('\n* Creating output folder...');
+    console.log('* Creating output folder...');
     if (!fs.existsSync(OUTPUT_FOLDER)) {
       await fsp.mkdir(OUTPUT_FOLDER);
     }
@@ -94,7 +94,12 @@ const parseSubtitleFile = async (filePath: string): Promise<string> => {
     let startAppending = false;
 
     inputFileLines.forEach((fileLine) => {
-      if (fileLine.startsWith('00:33:')) {
+      if (!startAppending && (
+        fileLine.startsWith('00:30:')
+        || fileLine.startsWith('00:31:')
+        || fileLine.startsWith('00:32:')
+        || fileLine.startsWith('00:33:')
+      )) {
         startAppending = true;
       }
       if (startAppending
